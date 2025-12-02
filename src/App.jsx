@@ -1,4 +1,6 @@
 import './App.css'
+import React, {useEffect, useState} from 'react';
+import {githubLogin, handleGithubCallback} from './githubAuth.js';
 
 // 静态资源
 import logo from './assets/logo.svg'
@@ -13,6 +15,28 @@ function preventSubmit(e) {
 }
 
 export default function App() {
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        // 页面加载时处理 GitHub 回调
+        handleGithubCallback().then((u) => {
+            if (u) setUser(u);
+        });
+    }, []);
+
+    if (user) {
+        return <UserPage user={user}/>;
+    }
+
+    // 登录成功后的页面
+    function UserPage({user}) {
+        return (<div>
+                <h1>登录成功！</h1>
+                <p>用户名: {user.login}</p>
+                <img src={user.avatar_url} alt="avatar" width={150}/>
+            </div>);
+    }
+
     return (// 页面容器：使用两列网格，填满视口高度
         <div className="page">
             {/* 左侧占位，移动端隐藏 */}
@@ -33,7 +57,8 @@ export default function App() {
                                 <img src={googleIcon} alt="Google" className="oauth-btn__icon"/>
                                 <span>继续使用 Google</span>
                             </button>
-                            <button className="oauth-btn" type="button" aria-label="继续使用 GitHub 登录">
+                            <button className="oauth-btn" type="button" aria-label="继续使用 GitHub 登录"
+                                    onClick={githubLogin}>
                                 <img src={githubIcon} alt="GitHub" className="oauth-btn__icon"/>
                                 <span>继续使用 GitHub</span>
                             </button>
